@@ -1,41 +1,48 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile, tools
-import os
+from conans import ConanFile, tools, CMake
 
 
-class LibnameConan(ConanFile):
-    name = "libname"
-    version = "0.0.0"
-    url = "https://github.com/bincrafters/conan-libname"
+class OpenMAXALConan(ConanFile):
+    name = "openmax_al"
+    version = "1.1"
+    url = "https://github.com/bincrafters/conan-openmax_al"
     author = "Bincrafters <bincrafters@gmail.com>"
-    description = "Keep it short"
-    no_copy_source = True
-
-    # Indicates License type of the packaged library
-    license = "MIT"
-
-    # Packages the license for the conanfile.py
+    description = "OpenMAX AL is a royalty-free, cross platform open standard for accelerating the capture, and " \
+                  "presentation of audio, video, and images in multimedia applications on embedded and mobile devices"
+    license = "Khronos"
     exports = ["LICENSE.md"]
+    generators = 'cmake'
+    exports_sources = ['CMakeLists.txt']
+    settings = "os", "arch", "compiler", "build_type"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = "shared=False", "fPIC=True"
 
-    # Custom attributes for Bincrafters recipe conventions
-    source_subfolder = "source_subfolder"
+    def configure(self):
+        del self.settings.compiler.libcxx
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def source(self):
-        source_url = "https://github.com/libauthor/libname"
-        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version))
-        extracted_dir = self.name + "-" + self.version
+        for file in ['OpenMAXAL.h', 'OpenMAXAL_Platform.h', 'OpenMAXAL_IID.c']:
+            tools.download('https://www.khronos.org/registry/OpenMAX-AL/api/1.1/%s' % file, file)
 
-        #Rename to "source_folder" is a convention to simplify later steps
-        os.rename(extracted_dir, self.source_subfolder)
-
+    def build(self):
+        cmake = CMake(self)
+        cmake.definitions['CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS'] = True
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        include_folder = os.path.join(self.source_subfolder, "include")
-        self.copy(pattern="LICENSE", dst="license", src=self.source_subfolder)
-        self.copy(pattern="*", dst="include", src=include_folder)
+        self.copy(pattern="*.h", dst="include")
+        self.copy(pattern="*.dll", dst="bin", keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", keep_path=False)
+        self.copy(pattern="*.dylib*", dst="lib", keep_path=False)
+        self.copy(pattern="*.so*", dst="lib", keep_path=False)
+        self.copy(pattern="*.a", dst="lib", keep_path=False)
 
-
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.libs = ['omxal']

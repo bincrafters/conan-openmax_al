@@ -5,7 +5,6 @@ class OpenMAXALConan(ConanFile):
     name = "openmax_al"
     version = "1.1"
     url = "https://github.com/bincrafters/conan-openmax_al"
-    author = "Bincrafters <bincrafters@gmail.com>"
     description = "OpenMAX AL is a royalty-free, cross platform open standard for accelerating the capture, and " \
                   "presentation of audio, video, and images in multimedia applications on embedded and mobile devices"
     license = "Khronos"

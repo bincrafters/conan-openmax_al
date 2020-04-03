@@ -8,7 +8,6 @@ class OpenMAXALConan(ConanFile):
     description = "OpenMAX AL is a royalty-free, cross platform open standard for accelerating the capture, and " \
                   "presentation of audio, video, and images in multimedia applications on embedded and mobile devices"
     license = "Khronos"
-    exports = ["LICENSE.md"]
     generators = 'cmake'
     exports_sources = ['CMakeLists.txt']
     settings = "os", "arch", "compiler", "build_type"
